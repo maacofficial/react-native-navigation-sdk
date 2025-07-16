@@ -1,5 +1,5 @@
-# Disable new arch as it is not supported by the current version of package
-ENV['RCT_NEW_ARCH_ENABLED'] = '0'
+# Enable new architecture for testing
+ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 
 def node_require(script)
   # Resolve script with node to allow for hoisting
@@ -58,4 +58,21 @@ post_install do |installer|
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+    
+    # Fix for Folly compilation issue
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
+        
+        # Fix for Folly Optional.h issue - disable coroutines that aren't needed
+        # Apply this globally to avoid coroutine header issues
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_CFG_NO_COROUTINES=1'
+        
+        if target.name == 'RCT-Folly'
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['HEADER_SEARCH_PATHS'] << '"$(PODS_ROOT)/RCT-Folly"'
+        end
+      end
+    end
 end

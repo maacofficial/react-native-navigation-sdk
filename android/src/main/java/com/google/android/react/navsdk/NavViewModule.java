@@ -22,6 +22,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.turbomodule.core.interfaces.TurboModule;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
@@ -37,7 +38,7 @@ import java.util.Map;
  * This exposes a series of methods that can be called diretly from the React Native code. They have
  * been implemented using promises as it's not recommended for them to be synchronous.
  */
-public class NavViewModule extends ReactContextBaseJavaModule {
+public class NavViewModule extends ReactContextBaseJavaModule implements TurboModule {
 
   private static final String TAG = "NavViewModule";
 

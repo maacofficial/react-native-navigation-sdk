@@ -2,7 +2,7 @@
   "name": "@googlemaps/react-native-navigation-sdk",
   "version": "0.9.2",
   "author": "Google",
-  "description": "A React Native library for Navigation SDK on Google Maps Platform",
+  "description": "A React Native library for Navigation SDK on Google Maps Platform (supports Fabric + TurboModules)",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/src/index.d.ts",
@@ -55,11 +55,13 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "prepare:example": "yarn workspace react-native-navigation-sdk-sample prepare",
-    "build": "bob build"
+    "build": "bob build",
+    "codegen": "npx react-native codegen"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.2.2",
     "@evilmartians/lefthook": "^1.5.0",
+    "@react-native-community/cli": "^15.1.2",
     "@react-native/eslint-config": "^0.74.83",
     "@testing-library/react-native": "^12.5.0",
     "@types/react": "18.2.6",
@@ -140,5 +142,13 @@
         }
       ]
     ]
+  },
+  "codegenConfig": {
+    "name": "RNNavSDKSpec",
+    "type": "all",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.google.android.react.navsdk.specs"
+    }
   }
 }

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { NativeModules } from 'react-native';
 import type { MapViewAutoController, NavigationAutoCallbacks } from './types';
 import { useModuleListeners, type Location } from '../shared';
+import {
+  NavAutoModule,
+  NavAutoEventDispatcher,
+} from '../shared/NativeModuleBridge';
 import type {
   MapType,
   CircleOptions,
@@ -32,8 +35,6 @@ import type {
   Padding,
 } from '../maps';
 import { useMemo } from 'react';
-
-const { NavAutoEventDispatcher, NavAutoModule } = NativeModules;
 
 const androidBridge: string = 'NavAutoJavascriptBridge';
 

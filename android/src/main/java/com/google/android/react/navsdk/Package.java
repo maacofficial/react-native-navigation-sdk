@@ -17,21 +17,76 @@ import com.facebook.proguard.annotations.DoNotStrip;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.module.model.ReactModuleInfo;
+import com.facebook.react.module.model.ReactModuleInfoProvider;
+import com.facebook.react.TurboReactPackage;
 import com.facebook.react.uimanager.ViewManager;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @DoNotStrip
-public class Package implements ReactPackage {
-
-  private NavViewManager mNavViewManager;
+public class Package extends TurboReactPackage {
 
   @Override
   public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
     return Arrays.asList(NavViewManager.getInstance(reactContext));
   }
 
+  @Override
+  public NativeModule getModule(String name, ReactApplicationContext reactContext) {
+    NavViewManager viewManager = NavViewManager.getInstance(reactContext);
+    
+    switch (name) {
+      case "NavModule":
+        return NavModule.getInstance(reactContext, viewManager);
+      case "NavAutoModule":
+        return new NavAutoModule(reactContext);
+      case "NavViewModule":
+        return new NavViewModule(reactContext, viewManager);
+      default:
+        return null;
+    }
+  }
+
+  @Override
+  public ReactModuleInfoProvider getReactModuleInfoProvider() {
+    return () -> {
+      Map<String, ReactModuleInfo> moduleInfos = new HashMap<>();
+      moduleInfos.put("NavModule", new ReactModuleInfo(
+        "NavModule",
+        "NavModule",
+        false, // canOverrideExistingModule
+        false, // needsEagerInit
+        true,  // hasConstants
+        false, // isCxxModule
+        true   // isTurboModule
+      ));
+      moduleInfos.put("NavAutoModule", new ReactModuleInfo(
+        "NavAutoModule",
+        "NavAutoModule",
+        false, // canOverrideExistingModule
+        false, // needsEagerInit
+        true,  // hasConstants
+        false, // isCxxModule
+        true   // isTurboModule
+      ));
+      moduleInfos.put("NavViewModule", new ReactModuleInfo(
+        "NavViewModule",
+        "NavViewModule",
+        false, // canOverrideExistingModule
+        false, // needsEagerInit
+        true,  // hasConstants
+        false, // isCxxModule
+        true   // isTurboModule
+      ));
+      return moduleInfos;
+    };
+  }
+
+  // Legacy support for old architecture
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
     List<NativeModule> modules = new ArrayList<>();

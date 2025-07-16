@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { NativeModules, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { useModuleListeners, type LatLng } from '../../shared';
+import { NavModule, NavEventDispatcher } from '../../shared/NativeModuleBridge';
 import type {
   Waypoint,
   AudioGuidance,
@@ -35,7 +36,7 @@ import {
 import { getRouteStatusFromStringValue } from '../navigationView';
 import { useMemo } from 'react';
 
-const { NavModule, NavEventDispatcher } = NativeModules;
+// Use the bridge that supports both architectures
 const androidBridge: string = 'NavJavascriptBridge';
 
 export const useNavigationController = (

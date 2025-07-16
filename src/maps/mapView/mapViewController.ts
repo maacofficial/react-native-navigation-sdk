@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { NativeModules } from 'react-native';
 import type { Location } from '../../shared/types';
 import { commands, sendCommand } from '../../shared/viewManager';
+import { NavViewModule } from '../../shared/NativeModuleBridge';
 import type {
   CameraPosition,
   Circle,
@@ -34,7 +34,6 @@ import type {
   PolygonOptions,
   PolylineOptions,
 } from './types';
-const { NavViewModule } = NativeModules;
 
 export const getMapViewController = (viewId: number): MapViewController => {
   return {

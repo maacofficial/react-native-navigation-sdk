@@ -41,13 +41,23 @@ import { NavigationView } from '@googlemaps/react-native-navigation-sdk';
 
 ### Android
 
-#### Disable new architecture
+#### New Architecture Support
 
-This package does not yet support new architecture. Make sure new architecture is disabled in your `android/gradle.properties` file:
+This package supports both React Native's old and new architectures (Fabric + TurboModules). 
+
+To enable the new architecture in your `android/gradle.properties` file:
+
+```groovy
+newArchEnabled=true
+```
+
+If you prefer to use the old architecture:
 
 ```groovy
 newArchEnabled=false
 ```
+
+For detailed information about new architecture support, see [NEW_ARCHITECTURE.md](./NEW_ARCHITECTURE.md).
 
 #### Enable Jetifier
 
@@ -96,13 +106,23 @@ See example configuration for secrets plugin at example applications [build.grad
 
 ### iOS
 
-#### Disable new architecture
+#### New Architecture Support
 
-This package does not yet support new architecture. Make sure new architecture is disabled in your `ios/Podfile`:
+This package supports both React Native's old and new architectures (Fabric + TurboModules).
+
+To enable the new architecture in your `ios/Podfile`:
+
+```ruby
+ENV['RCT_NEW_ARCH_ENABLED'] = '1'
+```
+
+If you prefer to use the old architecture:
 
 ```ruby
 ENV['RCT_NEW_ARCH_ENABLED'] = '0'
 ```
+
+For detailed information about new architecture support, see [NEW_ARCHITECTURE.md](./NEW_ARCHITECTURE.md).
 
 #### Set Google Maps API Key
 

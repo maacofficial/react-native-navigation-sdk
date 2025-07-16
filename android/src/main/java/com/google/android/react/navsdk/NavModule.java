@@ -32,6 +32,7 @@ import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.turbomodule.core.interfaces.TurboModule;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.mapsplatform.turnbyturn.model.NavInfo;
 import com.google.android.libraries.mapsplatform.turnbyturn.model.StepInfo;
@@ -60,7 +61,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * been implemented using promises as it's not recommended for them to be synchronous.
  */
 public class NavModule extends ReactContextBaseJavaModule
-    implements INavigationCallback, LifecycleEventListener {
+    implements INavigationCallback, LifecycleEventListener, TurboModule {
   public static final String REACT_CLASS = "NavModule";
   private static final String TAG = "NavModule";
   private static NavModule instance;
