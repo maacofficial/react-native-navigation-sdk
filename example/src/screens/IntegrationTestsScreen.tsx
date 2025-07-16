@@ -30,7 +30,7 @@ import {
   type Polyline,
   NavigationView,
   useNavigation,
-} from '@googlemaps/react-native-navigation-sdk';
+} from '@mdemircioglu/react-native-navigation-sdk';
 import styles from '../styles';
 import OverlayModal from '../helpers/overlayModal';
 import {

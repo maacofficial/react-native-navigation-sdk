@@ -41,7 +41,7 @@ To verify the new architecture is working:
 
 1. Check that TurboModules are being used:
 ```javascript
-import { NavModule } from '@googlemaps/react-native-navigation-sdk';
+import { NavModule } from '@mdemircioglu/react-native-navigation-sdk';
 console.log('Using TurboModule:', NavModule.__turboModuleProxy != null);
 ```
 

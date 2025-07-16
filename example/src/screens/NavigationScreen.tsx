@@ -38,7 +38,7 @@ import {
   useNavigation,
   useNavigationAuto,
   type CustomNavigationAutoEvent,
-} from '@googlemaps/react-native-navigation-sdk';
+} from '@mdemircioglu/react-native-navigation-sdk';
 import MapsControls from '../controls/mapsControls';
 import NavigationControls from '../controls/navigationControls';
 import OverlayModal from '../helpers/overlayModal';

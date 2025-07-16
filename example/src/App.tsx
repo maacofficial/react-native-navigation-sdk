@@ -29,7 +29,7 @@ import {
   NavigationProvider,
   TaskRemovedBehavior,
   type TermsAndConditionsDialogOptions,
-} from '@googlemaps/react-native-navigation-sdk';
+} from '@mdemircioglu/react-native-navigation-sdk';
 import IntegrationTestsScreen from './screens/IntegrationTestsScreen';
 
 export type ScreenNames = [

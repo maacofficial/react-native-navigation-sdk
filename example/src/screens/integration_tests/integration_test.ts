@@ -22,7 +22,7 @@ import {
   type NavigationInitErrorCode,
   type NavigationViewController,
   type TimeAndDistance,
-} from '@googlemaps/react-native-navigation-sdk';
+} from '@mdemircioglu/react-native-navigation-sdk';
 import { Platform } from 'react-native';
 import { delay, roundDown } from './utils';
 

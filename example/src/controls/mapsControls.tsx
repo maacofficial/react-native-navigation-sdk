@@ -28,7 +28,7 @@ import {
   type Polyline,
   type Polygon,
   type Padding,
-} from '@googlemaps/react-native-navigation-sdk';
+} from '@mdemircioglu/react-native-navigation-sdk';
 
 export interface MapControlsProps {
   readonly mapViewController: MapViewController;

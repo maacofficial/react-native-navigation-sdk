@@ -27,16 +27,16 @@ This repository contains a React Native plugin that provides a [Google Navigatio
 
 ## Installation
 
-This package is listed on NPM as [@googlemaps/react-native-navigation-sdk](https://www.npmjs.com/package/@googlemaps/react-native-navigation-sdk). Install it with:
+This package is listed on NPM as [@mdemircioglu/react-native-navigation-sdk](https://www.npmjs.com/package/@mdemircioglu/react-native-navigation-sdk). Install it with:
 
 ```shell
-npm i @googlemaps/react-native-navigation-sdk
+npm i @mdemircioglu/react-native-navigation-sdk
 ```
 
 In your TSX or JSX file, import the components you need:
 
 ```tsx
-import { NavigationView } from '@googlemaps/react-native-navigation-sdk';
+import { NavigationView } from '@mdemircioglu/react-native-navigation-sdk';
 ```
 
 ### Android
@@ -152,7 +152,7 @@ import {
   NavigationProvider,
   TaskRemovedBehavior,
   type TermsAndConditionsDialogOptions,
-} from '@googlemaps/react-native-navigation-sdk';
+} from '@mdemircioglu/react-native-navigation-sdk';
 
 const termsAndConditionsDialogOptions: TermsAndConditionsDialogOptions = {
   title: 'Terms and Conditions Title',

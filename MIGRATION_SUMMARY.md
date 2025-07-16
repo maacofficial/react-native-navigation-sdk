@@ -78,7 +78,7 @@ No code changes required! The library automatically detects the architecture:
 
 ```typescript
 // Same code works for both architectures
-import { NavigationView, useNavigationController } from '@googlemaps/react-native-navigation-sdk';
+import { NavigationView, useNavigationController } from '@mdemircioglu/react-native-navigation-sdk';
 
 // Library automatically uses TurboModules if available
 const { navigationController } = useNavigationController(options);

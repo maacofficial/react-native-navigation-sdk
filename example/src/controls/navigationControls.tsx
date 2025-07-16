@@ -33,7 +33,7 @@ import {
   type CameraPosition,
   type NavigationController,
   type DisplayOptions,
-} from '@googlemaps/react-native-navigation-sdk';
+} from '@mdemircioglu/react-native-navigation-sdk';
 import SelectDropdown from 'react-native-select-dropdown';
 
 import styles from '../styles';

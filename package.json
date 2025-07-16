@@ -1,7 +1,7 @@
 {
-  "name": "@googlemaps/react-native-navigation-sdk",
+  "name": "@mdemircioglu/react-native-navigation-sdk",
   "version": "0.9.2",
-  "author": "Google",
+  "author": "Wattod (forked from Google)",
   "description": "A React Native library for Navigation SDK on Google Maps Platform (supports Fabric + TurboModules)",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -21,6 +21,7 @@
     "!android/gradlew",
     "!android/gradlew.bat",
     "!android/local.properties",
+    "!android/app/build",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
@@ -28,13 +29,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/googlemaps/react-native-navigation-sdk.git"
+    "url": "git+https://github.com/maacofficial/react-native-navigation-sdk.git"
   },
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/googlemaps/react-native-navigation-sdk/issues"
+    "url": "https://github.com/maacofficial/react-native-navigation-sdk/issues"
   },
-  "homepage": "https://github.com/googlemaps/react-native-navigation-sdk#readme",
+  "homepage": "https://github.com/maacofficial/react-native-navigation-sdk#readme",
   "keywords": [
     "react-native",
     "ios",
@@ -46,7 +47,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "registry": "https://wombat-dressing-room.appspot.com/"
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "example": "yarn workspace react-native-navigation-sdk-sample",

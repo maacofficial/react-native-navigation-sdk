@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@googlemaps/react-native-navigation-sdk": ["./src/index"]
+      "@mdemircioglu/react-native-navigation-sdk": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
