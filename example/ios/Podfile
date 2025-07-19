@@ -1,4 +1,4 @@
-# Enable new architecture for testing
+# Enable new architecture for React Native 0.78.x
 ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 
 def node_require(script)
@@ -31,26 +31,40 @@ end
 
 config = use_native_modules!
 
-target 'SampleApp' do
-  use_react_native!(
-    :path => config[:reactNativePath],
+def shared_example_target_config(name, config)
+  target name do
+    use_react_native!(
+      :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
-  )
+      :app_path => "#{Pod::Config.instance.installation_root}/..",
+    )
+
+    pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
+    pod 'react-native-navigation-sdk', :path => '../..'
+
+    unless name.end_with?("CarPlay")
+      setup_permissions([
+        'LocationAccuracy',
+        'LocationAlways',
+        'LocationWhenInUse',
+        'Notifications',
+      ])
+    end
+  end
 end
 
-target 'SampleAppCarPlay' do
-  use_react_native!(
-    :path => config[:reactNativePath],
-    # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
-  )
-end
+shared_example_target_config('SampleApp', config)
+shared_example_target_config('SampleAppCarPlay', config)
 
 target 'SampleAppTests' do
+  # Test target that inherits from the app
   inherit! :complete
-  # Pods for testing, shared between both SampleApp and SampleAppCarPlay
 end
+
+# Run Codegen during development for the example app.
+# pre_install do |installer|
+#   system("cd ../../ && npx bob build --target codegen")
+# end
 
 post_install do |installer|
     react_native_post_install(
@@ -58,21 +72,4 @@ post_install do |installer|
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    
-    # Fix for Folly compilation issue
-    installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
-        
-        # Fix for Folly Optional.h issue - disable coroutines that aren't needed
-        # Apply this globally to avoid coroutine header issues
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_CFG_NO_COROUTINES=1'
-        
-        if target.name == 'RCT-Folly'
-          config.build_settings['HEADER_SEARCH_PATHS'] ||= ['$(inherited)']
-          config.build_settings['HEADER_SEARCH_PATHS'] << '"$(PODS_ROOT)/RCT-Folly"'
-        end
-      end
-    end
 end

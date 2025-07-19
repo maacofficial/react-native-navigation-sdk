@@ -168,11 +168,29 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
       @NonNull FrameLayout root, String commandId, @Nullable ReadableArray args) {
     super.receiveCommand(root, commandId, args);
     int commandIdInt = Integer.parseInt(commandId);
+    android.util.Log.d("NavViewManager", "receiveCommand (String) called with commandId: " + commandId + ", parsed to: " + commandIdInt);
+    executeCommand(root, commandIdInt, args);
+  }
 
+  // New signature for React Native 0.78.2+ with Fabric support
+  @Override
+  public void receiveCommand(
+      @NonNull FrameLayout root, int commandId, @Nullable ReadableArray args) {
+    super.receiveCommand(root, commandId, args);
+    android.util.Log.d("NavViewManager", "receiveCommand (int) called with commandId: " + commandId);
+    executeCommand(root, commandId, args);
+  }
+
+  private void executeCommand(@NonNull FrameLayout root, int commandIdInt, @Nullable ReadableArray args) {
+    android.util.Log.d("NavViewManager", "executeCommand called with commandId: " + commandIdInt);
+    
     switch (Command.find(commandIdInt)) {
       case CREATE_FRAGMENT:
         Map<String, Object> stylingOptions = args.getMap(0).toHashMap();
-        CustomTypes.FragmentType fragmentType = getFragmentTypeFromJsValue(args.getInt(1));
+        int jsFragmentType = args.getInt(1);
+        android.util.Log.d("NavViewManager", "CREATE_FRAGMENT command received. JS fragment type value: " + jsFragmentType);
+        CustomTypes.FragmentType fragmentType = getFragmentTypeFromJsValue(jsFragmentType);
+        android.util.Log.d("NavViewManager", "Converted to FragmentType: " + fragmentType);
         createFragment(root, stylingOptions, fragmentType);
         break;
       case DELETE_FRAGMENT:
@@ -303,6 +321,7 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
         getFragmentForRoot(root)
             .getMapController()
             .setPadding(args.getInt(0), args.getInt(1), args.getInt(2), args.getInt(3));
+        break;
     }
   }
 
@@ -337,6 +356,7 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
   /** Replace your React Native view with a custom fragment */
   public void createFragment(
       FrameLayout root, Map stylingOptions, CustomTypes.FragmentType fragmentType) {
+    android.util.Log.d("NavViewManager", "createFragment called with fragmentType: " + fragmentType + " (MAP=" + CustomTypes.FragmentType.MAP + ", NAVIGATION=" + CustomTypes.FragmentType.NAVIGATION + ")");
     setupLayout(root);
 
     FragmentActivity activity = (FragmentActivity) reactContext.getCurrentActivity();
@@ -345,6 +365,7 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
       Fragment fragment;
       // FragmentType 0 = MAP, 1 = NAVIGATION.
       if (fragmentType == CustomTypes.FragmentType.MAP) {
+        android.util.Log.d("NavViewManager", "Creating MAP fragment for viewId: " + viewId);
         MapViewFragment mapFragment = new MapViewFragment(reactContext, root.getId());
         fragmentMap.put(viewId, new WeakReference<IMapViewFragment>(mapFragment));
         fragment = mapFragment;
@@ -353,6 +374,7 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
           mapFragment.setStylingOptions(new StylingOptionsBuilder.Builder(stylingOptions).build());
         }
       } else {
+        android.util.Log.d("NavViewManager", "Creating NAVIGATION fragment for viewId: " + viewId);
         NavViewFragment navFragment = new NavViewFragment(reactContext, root.getId());
         fragmentMap.put(viewId, new WeakReference<IMapViewFragment>(navFragment));
         fragment = navFragment;
@@ -361,11 +383,14 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
           navFragment.setStylingOptions(new StylingOptionsBuilder.Builder(stylingOptions).build());
         }
       }
+      android.util.Log.d("NavViewManager", "Fragment created successfully, committing transaction for viewId: " + viewId);
       activity
           .getSupportFragmentManager()
           .beginTransaction()
           .replace(viewId, fragment, String.valueOf(viewId))
           .commit();
+    } else {
+      android.util.Log.e("NavViewManager", "FragmentActivity is null, cannot create fragment");
     }
   }
 

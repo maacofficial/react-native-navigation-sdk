@@ -27,7 +27,11 @@ export interface Spec extends TurboModule {
   ): Promise<boolean>;
   resetTermsAccepted(): Promise<void>;
 
-  // Navigation Session
+  // Navigation Session  
+  initializeNavigator(
+    termsAndConditionsDialogOptions?: Object | null,
+    taskRemovedBehavior?: number
+  ): void;
   initializeNavigationSession(): Promise<void>;
   isInitialized(): Promise<boolean>;
   cleanup(): Promise<void>;

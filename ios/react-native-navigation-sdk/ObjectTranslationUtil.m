@@ -26,6 +26,10 @@
 }
 
 + (NSDictionary *)transformNavigationWaypointToDictionary:(GMSNavigationWaypoint *)waypoint {
+  if (waypoint == nil) {
+    return @{};
+  }
+  
   NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] init];
 
   dictionary[@"position"] =
@@ -73,13 +77,17 @@
 }
 
 + (NSDictionary *)transformRouteSegmentToDictionary:(GMSRouteLeg *)routeLeg {
-  return @{
-    @"destinationLatLng" :
-        [ObjectTranslationUtil transformCoordinateToDictionary:routeLeg.destinationCoordinate],
-    @"destinationWaypoint" : [ObjectTranslationUtil
-        transformNavigationWaypointToDictionary:routeLeg.destinationWaypoint],
-    @"segmentLatLngList" : [ObjectTranslationUtil transformGMSPathToArray:routeLeg.path],
-  };
+  NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+  
+  dict[@"destinationLatLng"] = [ObjectTranslationUtil transformCoordinateToDictionary:routeLeg.destinationCoordinate];
+  dict[@"segmentLatLngList"] = [ObjectTranslationUtil transformGMSPathToArray:routeLeg.path];
+  
+  // Only set destinationWaypoint if it's not nil - React Native 0.78.x doesn't handle NSNull well
+  if (routeLeg.destinationWaypoint != nil) {
+    dict[@"destinationWaypoint"] = [ObjectTranslationUtil transformNavigationWaypointToDictionary:routeLeg.destinationWaypoint];
+  }
+  
+  return [dict copy];
 }
 
 + (NSDictionary *)transformMarkerToDictionary:(GMSMarker *)marker {
@@ -88,8 +96,12 @@
   dictionary[@"position"] = [ObjectTranslationUtil transformCoordinateToDictionary:marker.position];
   dictionary[@"alpha"] = @(marker.opacity);
   dictionary[@"rotation"] = @(marker.rotation);
-  dictionary[@"snippet"] = marker.snippet;
   dictionary[@"zIndex"] = @(marker.zIndex);
+  
+  // Only set snippet if it's not nil - React Native 0.78.x doesn't handle NSNull well
+  if (marker.snippet != nil) {
+    dictionary[@"snippet"] = marker.snippet;
+  }
 
   if (marker.title != nil) {
     dictionary[@"title"] = marker.title;
@@ -121,6 +133,10 @@
 }
 
 + (NSArray *)transformGMSPathToArray:(GMSPath *)path {
+  if (path == nil) {
+    return @[];
+  }
+  
   NSMutableArray *array = [[NSMutableArray alloc] init];
 
   for (int j = 0; j < path.count; j++) {

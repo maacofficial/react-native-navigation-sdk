@@ -505,7 +505,13 @@ RCT_EXPORT_METHOD(getRouteSegments
     NSMutableArray *arr = [[NSMutableArray alloc] init];
 
     for (int i = 0; i < routeSegmentList.count; i++) {
-      [arr addObject:[ObjectTranslationUtil transformRouteSegmentToDictionary:routeSegmentList[i]]];
+      GMSRouteLeg *segment = routeSegmentList[i];
+      if (segment != nil) {
+        NSDictionary *segmentDict = [ObjectTranslationUtil transformRouteSegmentToDictionary:segment];
+        if (segmentDict != nil) {
+          [arr addObject:segmentDict];
+        }
+      }
     }
 
     resolve(arr);
@@ -647,7 +653,12 @@ RCT_EXPORT_METHOD(stopUpdatingLocation) {
 
 - (void)sendCommandToReactNative:(NSString *)command args:(NSObject *)args {
   if (_eventDispatcher != NULL) {
-    [_eventDispatcher sendEventName:command body:args];
+    // For React Native 0.78.x, avoid passing nil args entirely
+    if (args != nil) {
+      [_eventDispatcher sendEventName:command body:args];
+    } else {
+      [_eventDispatcher sendEventName:command body:@{}];
+    }
   }
 }
 
@@ -808,7 +819,10 @@ RCT_EXPORT_METHOD(stopUpdatingLocation) {
   if (navInfo.remainingSteps != NULL) {
     for (GMSNavigationStepInfo *step in navInfo.remainingSteps) {
       if (step != NULL) {
-        [steps addObject:[self getStepInfo:step]];
+        NSDictionary *stepDict = [self getStepInfo:step];
+        if (stepDict != nil) {
+          [steps addObject:stepDict];
+        }
       }
     }
   }
@@ -831,9 +845,17 @@ RCT_EXPORT_METHOD(stopUpdatingLocation) {
   [obj setValue:[NSNumber numberWithInteger:stepInfo.drivingSide] forKey:@"drivingSide"];
   [obj setValue:[NSNumber numberWithInteger:stepInfo.stepNumber] forKey:@"stepNumber"];
   [obj setValue:[NSNumber numberWithInteger:stepInfo.maneuver] forKey:@"maneuver"];
-  [obj setValue:stepInfo.exitNumber forKey:@"exitNumber"];
-  [obj setValue:stepInfo.fullRoadName forKey:@"fullRoadName"];
-  [obj setValue:stepInfo.fullInstructionText forKey:@"instruction"];
+  
+  // Only set values if they're not nil - React Native 0.78.x doesn't handle NSNull well
+  if (stepInfo.exitNumber != nil) {
+    [obj setValue:stepInfo.exitNumber forKey:@"exitNumber"];
+  }
+  if (stepInfo.fullRoadName != nil) {
+    [obj setValue:stepInfo.fullRoadName forKey:@"fullRoadName"];
+  }
+  if (stepInfo.fullInstructionText != nil) {
+    [obj setValue:stepInfo.fullInstructionText forKey:@"instruction"];
+  }
 
   return obj;
 }

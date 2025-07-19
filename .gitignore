@@ -83,3 +83,5 @@ lib/
 
 # tests
 coverage/
+
+.kotlin/

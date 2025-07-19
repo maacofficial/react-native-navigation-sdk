@@ -68,10 +68,46 @@ RCT_EXPORT_MODULE(NavEventDispatcher);
 
 - (void)sendEventName:(NSString *)eventName body:(id)body {
   if (hasListeners) {
-    [self sendEventWithName:eventName body:body];
+    id sanitizedBody = [self sanitizeDataForReactNative:body];
+    [self sendEventWithName:eventName body:sanitizedBody];
   } else {
     NSLog(@"NavEventDispatcher sendEventName called without listeners: %@", eventName);
   }
+}
+
+// Helper method to recursively sanitize data for React Native 0.78.x
+- (id)sanitizeDataForReactNative:(id)obj {
+  if (obj == nil || obj == [NSNull null]) {
+    return @{};  // Return empty object instead of nil/NSNull
+  }
+  
+  if ([obj isKindOfClass:[NSDictionary class]]) {
+    NSMutableDictionary *sanitized = [[NSMutableDictionary alloc] init];
+    NSDictionary *dict = (NSDictionary *)obj;
+    for (NSString *key in dict) {
+      id value = dict[key];
+      if (value != nil && value != [NSNull null]) {
+        sanitized[key] = [self sanitizeDataForReactNative:value];
+      }
+      // Skip nil/NSNull values entirely
+    }
+    return [sanitized copy];
+  }
+  
+  if ([obj isKindOfClass:[NSArray class]]) {
+    NSMutableArray *sanitized = [[NSMutableArray alloc] init];
+    NSArray *array = (NSArray *)obj;
+    for (id item in array) {
+      if (item != nil && item != [NSNull null]) {
+        [sanitized addObject:[self sanitizeDataForReactNative:item]];
+      }
+      // Skip nil/NSNull values entirely
+    }
+    return [sanitized copy];
+  }
+  
+  // For primitives, return as-is
+  return obj;
 }
 
 @end

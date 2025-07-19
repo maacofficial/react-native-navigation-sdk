@@ -40,19 +40,42 @@ export const sendCommand = (
     );
   }
 
+  console.log('sendCommand called with:', { viewId, command, args });
+
   try {
     UIManager.dispatchViewManagerCommand(
       viewId,
       Platform.OS === 'android' ? command.toString() : command,
       args
     );
+    console.log('UIManager.dispatchViewManagerCommand executed successfully');
   } catch (exception) {
-    console.error(exception);
+    console.error('Error in sendCommand:', exception);
   }
 };
 
-export const commands =
-  UIManager.getViewManagerConfig(viewManagerName).Commands;
+// Lazy load commands to avoid duplicate registration
+let _commands: any = null;
+export const getCommands = () => {
+  if (_commands === null) {
+    try {
+      _commands = UIManager.getViewManagerConfig(viewManagerName)?.Commands;
+      console.log('Commands loaded successfully:', _commands);
+    } catch (error) {
+      console.error('Error loading commands:', error);
+      _commands = {};
+    }
+  }
+  return _commands;
+};
+
+// Legacy export for backward compatibility  
+export const commands = new Proxy({} as any, {
+  get(_target, prop) {
+    const cmds = getCommands();
+    return cmds ? cmds[prop] : undefined;
+  }
+});
 
 export interface NativeNavViewProps extends ViewProps {
   flex?: number | undefined;

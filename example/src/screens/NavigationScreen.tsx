@@ -16,7 +16,6 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Button, Switch, Text, View } from 'react-native';
-import Snackbar from 'react-native-snackbar';
 
 import {
   NavigationInitErrorCode,
@@ -44,10 +43,11 @@ import NavigationControls from '../controls/navigationControls';
 import OverlayModal from '../helpers/overlayModal';
 import styles from '../styles';
 import usePermissions from '../checkPermissions';
+import { showToast } from '../utils/Toast';
 
-// Utility function for showing Snackbar
-const showSnackbar = (text: string, duration = Snackbar.LENGTH_SHORT) => {
-  Snackbar.show({ text, duration });
+// Utility function for showing Toast
+const showSnackbar = (text: string, duration?: number) => {
+  showToast(text, duration);
 };
 
 enum OverlayType {
@@ -107,9 +107,15 @@ const NavigationScreen = () => {
   }, []);
 
   const onNavigationReady = useCallback(() => {
-    console.log('onNavigationReady');
+    console.log('onNavigationReady called - setting navigation initialized to true');
+    console.log('Current state before setting:', {
+      navigationInitialized,
+      navigationViewController: !!navigationViewController,
+      navigationController: !!navigationController,
+      mapViewController: !!mapViewController
+    });
     setNavigationInitialized(true);
-  }, []);
+  }, [navigationInitialized, navigationViewController, navigationController, mapViewController]);
 
   const onNavigationDispose = useCallback(async () => {
     await navigationViewController?.setNavigationUIEnabled(false);
@@ -280,11 +286,22 @@ const NavigationScreen = () => {
     console.log('Map is ready, initializing navigator...');
     try {
       await navigationController.init();
+      
+      // Workaround: Since events might not be delivered in new architecture,
+      // wait a bit and then check if navigation is ready manually
+      setTimeout(() => {
+        console.log('Checking navigation state after initialization...');
+        if (!navigationInitialized) {
+          console.log('Navigation event not received, manually setting initialized state');
+          setNavigationInitialized(true);
+        }
+      }, 2000);
+      
     } catch (error) {
       console.error('Error initializing navigator', error);
       showSnackbar('Error initializing navigator');
     }
-  }, [navigationController]);
+  }, [navigationController, navigationInitialized]);
 
   const onRecenterButtonClick = useCallback(() => {
     console.log('onRecenterButtonClick');
@@ -340,6 +357,16 @@ const NavigationScreen = () => {
   const closeOverlay = (): void => {
     setOverlayType(OverlayType.None);
   };
+
+  // Debug logging for render state
+  console.log('NavigationScreen render state:', {
+    arePermissionsApproved,
+    navigationInitialized,
+    hasNavigationViewController: !!navigationViewController,
+    hasNavigationController: !!navigationController,
+    hasMapViewController: !!mapViewController,
+    overlayType
+  });
 
   return arePermissionsApproved ? (
     <View style={styles.container}>

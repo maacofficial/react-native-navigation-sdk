@@ -22,10 +22,12 @@
 
 int main(int argc, char *argv[]) {
   @autoreleasepool {
+    NSString *appDelegateClassName;
 #if defined(CARPLAY)
-    return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegateCarPlay class]));
+    appDelegateClassName = NSStringFromClass([AppDelegateCarPlay class]);
 #else
-    return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+    appDelegateClassName = NSStringFromClass([AppDelegate class]);
 #endif
+    return UIApplicationMain(argc, argv, nil, appDelegateClassName);
   }
 }

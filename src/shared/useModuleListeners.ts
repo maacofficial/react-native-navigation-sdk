@@ -53,9 +53,13 @@ export const useModuleListeners = <
       (acc, eventName) => {
         const eventKey = eventName as keyof T;
         acc[eventKey] = (...args: unknown[]) => {
+          // Filter out null/undefined values to prevent iOS dictionary creation errors
+          const safeArgs = args.filter(arg => arg != null);
           listenersRef.current[eventKey]?.forEach(callback =>
             callback(
-              ...(eventTransformer ? eventTransformer(eventKey, ...args) : args)
+              ...(eventTransformer 
+                ? eventTransformer(eventKey, ...safeArgs) 
+                : safeArgs)
             )
           );
         };
@@ -76,6 +80,21 @@ export const useModuleListeners = <
     if (Platform.OS === 'android') {
       const BatchedBridge = require('react-native/Libraries/BatchedBridge/BatchedBridge');
       BatchedBridge.registerCallableModule(androidBridge, wrappedListeners);
+      
+      // Also listen for DeviceEventManager events for new architecture
+      const DeviceEventEmitter = require('react-native').DeviceEventEmitter;
+      eventTypes.forEach(eventType => {
+        const eventName = `NavModule_${String(eventType)}`;
+        DeviceEventEmitter.removeAllListeners(eventName);
+        DeviceEventEmitter.addListener(eventName, (...args: unknown[]) => {
+          console.log(`DeviceEventEmitter received: ${eventName}`, args);
+          // Filter out null/undefined values to prevent issues
+          const safeArgs = args.filter(arg => arg != null);
+          if (wrappedListeners[eventType]) {
+            wrappedListeners[eventType]!(...safeArgs);
+          }
+        });
+      });
     } else if (Platform.OS === 'ios') {
       eventTypes.forEach(eventType => {
         getIOSEventEmitter().removeAllListeners(eventType as string);

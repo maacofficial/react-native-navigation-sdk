@@ -30,7 +30,21 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => "15.0" }
   s.source       = { :git => "https://github.com/googlemaps/react-native-navigation-sdk.git", :tag => "#{s.version}" }
 
+  # Base source files (always included)
   s.source_files = "ios/react-native-navigation-sdk/*.{h,m,mm}"
+  
+  # Exclude new architecture specific files from old architecture builds
+  s.exclude_files = []
+  
+  # Only include new architecture files when enabled
+  if ENV['RCT_NEW_ARCH_ENABLED'] != '1' then
+    s.exclude_files = [
+      "ios/react-native-navigation-sdk/RCTNavViewComponentView.h",
+      "ios/react-native-navigation-sdk/RCTNavViewComponentView.mm",
+      "ios/react-native-navigation-sdk/NavViewManagerComponentView.h", 
+      "ios/react-native-navigation-sdk/NavViewManagerComponentView.mm"
+    ]
+  end
 
   s.dependency "React-Core"
   s.dependency "GoogleNavigation", "9.1.2"
