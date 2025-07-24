@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -142,7 +143,8 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
   public IMapViewFragment getFragmentForViewId(int viewId) {
     WeakReference<IMapViewFragment> weakReference = fragmentMap.get(viewId);
     if (weakReference == null || weakReference.get() == null) {
-      throw new IllegalStateException("Fragment not found for the provided viewId.");
+      android.util.Log.e("NavViewManager", "Fragment not found for viewId: " + viewId);
+      throw new IllegalStateException("Fragment not found for the provided viewId: " + viewId);
     }
     return weakReference.get();
   }
@@ -363,32 +365,54 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
     if (activity != null) {
       int viewId = root.getId();
       Fragment fragment;
-      // FragmentType 0 = MAP, 1 = NAVIGATION.
-      if (fragmentType == CustomTypes.FragmentType.MAP) {
-        android.util.Log.d("NavViewManager", "Creating MAP fragment for viewId: " + viewId);
-        MapViewFragment mapFragment = new MapViewFragment(reactContext, root.getId());
-        fragmentMap.put(viewId, new WeakReference<IMapViewFragment>(mapFragment));
-        fragment = mapFragment;
+      
+      // Ensure we're on the UI thread for fragment operations
+      UiThreadUtil.runOnUiThread(() -> {
+        try {
+          Fragment fragmentToAdd;
+          // FragmentType 0 = MAP, 1 = NAVIGATION.
+          if (fragmentType == CustomTypes.FragmentType.MAP) {
+            android.util.Log.d("NavViewManager", "Creating MAP fragment for viewId: " + viewId);
+            MapViewFragment mapFragment = new MapViewFragment(reactContext, root.getId());
+            fragmentMap.put(viewId, new WeakReference<IMapViewFragment>(mapFragment));
+            fragmentToAdd = mapFragment;
 
-        if (stylingOptions != null) {
-          mapFragment.setStylingOptions(new StylingOptionsBuilder.Builder(stylingOptions).build());
-        }
-      } else {
-        android.util.Log.d("NavViewManager", "Creating NAVIGATION fragment for viewId: " + viewId);
-        NavViewFragment navFragment = new NavViewFragment(reactContext, root.getId());
-        fragmentMap.put(viewId, new WeakReference<IMapViewFragment>(navFragment));
-        fragment = navFragment;
+            if (stylingOptions != null) {
+              mapFragment.setStylingOptions(new StylingOptionsBuilder.Builder(stylingOptions).build());
+            }
+          } else {
+            android.util.Log.d("NavViewManager", "Creating NAVIGATION fragment for viewId: " + viewId);
+            NavViewFragment navFragment = new NavViewFragment(reactContext, root.getId());
+            fragmentMap.put(viewId, new WeakReference<IMapViewFragment>(navFragment));
+            fragmentToAdd = navFragment;
 
-        if (stylingOptions != null) {
-          navFragment.setStylingOptions(new StylingOptionsBuilder.Builder(stylingOptions).build());
+            if (stylingOptions != null) {
+              navFragment.setStylingOptions(new StylingOptionsBuilder.Builder(stylingOptions).build());
+            }
+          }
+          
+          android.util.Log.d("NavViewManager", "Fragment created successfully, committing transaction for viewId: " + viewId);
+          
+          // Check if fragment is already added to avoid duplicate addition
+          Fragment existingFragment = activity.getSupportFragmentManager().findFragmentByTag(String.valueOf(viewId));
+          if (existingFragment != null) {
+            android.util.Log.d("NavViewManager", "Removing existing fragment before adding new one");
+            activity.getSupportFragmentManager()
+                .beginTransaction()
+                .remove(existingFragment)
+                .commitNow();
+          }
+          
+          activity
+              .getSupportFragmentManager()
+              .beginTransaction()
+              .replace(viewId, fragmentToAdd, String.valueOf(viewId))
+              .commitAllowingStateLoss();
+              
+        } catch (Exception e) {
+          android.util.Log.e("NavViewManager", "Error creating fragment", e);
         }
-      }
-      android.util.Log.d("NavViewManager", "Fragment created successfully, committing transaction for viewId: " + viewId);
-      activity
-          .getSupportFragmentManager()
-          .beginTransaction()
-          .replace(viewId, fragment, String.valueOf(viewId))
-          .commit();
+      });
     } else {
       android.util.Log.e("NavViewManager", "FragmentActivity is null, cannot create fragment");
     }
@@ -413,15 +437,19 @@ public class NavViewManager extends SimpleViewManager<FrameLayout> {
 
   /** Layout all children properly */
   public void manuallyLayoutChildren(FrameLayout view) {
-    IMapViewFragment fragment = getFragmentForRoot(view);
-    if (fragment.isAdded()) {
-      View childView = fragment.getView();
-      if (childView != null) {
-        childView.measure(
-            View.MeasureSpec.makeMeasureSpec(view.getMeasuredWidth(), View.MeasureSpec.EXACTLY),
-            View.MeasureSpec.makeMeasureSpec(view.getMeasuredHeight(), View.MeasureSpec.EXACTLY));
-        childView.layout(0, 0, childView.getMeasuredWidth(), childView.getMeasuredHeight());
+    try {
+      IMapViewFragment fragment = getFragmentForRoot(view);
+      if (fragment != null && fragment.isAdded()) {
+        View childView = fragment.getView();
+        if (childView != null) {
+          childView.measure(
+              View.MeasureSpec.makeMeasureSpec(view.getMeasuredWidth(), View.MeasureSpec.EXACTLY),
+              View.MeasureSpec.makeMeasureSpec(view.getMeasuredHeight(), View.MeasureSpec.EXACTLY));
+          childView.layout(0, 0, childView.getMeasuredWidth(), childView.getMeasuredHeight());
+        }
       }
+    } catch (Exception e) {
+      android.util.Log.e("NavViewManager", "Error in manuallyLayoutChildren: " + e.getMessage());
     }
   }
 

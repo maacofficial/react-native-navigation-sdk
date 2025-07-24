@@ -18,60 +18,18 @@ import type { TurboModule } from 'react-native';
 import { TurboModuleRegistry } from 'react-native';
 
 export interface Spec extends TurboModule {
-  // Map functions
-  animateCamera(cameraPosition: Object): Promise<void>;
-  moveCamera(cameraPosition: Object): Promise<void>;
-  getCameraPosition(): Promise<Object>;
-  getBounds(): Promise<Object>;
+  // Camera and map info methods
+  getCameraPosition(viewId: number): Promise<Object>;
+  getMyLocation(viewId: number): Promise<Object>;
+  getUiSettings(viewId: number): Promise<Object>;
+  isMyLocationEnabled(viewId: number): Promise<boolean>;
 
-  // Map type and settings
-  setMapType(mapType: number): Promise<void>;
-  getMapType(): Promise<number>;
-  setCompassEnabled(enabled: boolean): Promise<void>;
-  setRotateGesturesEnabled(enabled: boolean): Promise<void>;
-  setScrollGesturesEnabled(enabled: boolean): Promise<void>;
-  setTiltGesturesEnabled(enabled: boolean): Promise<void>;
-  setZoomGesturesEnabled(enabled: boolean): Promise<void>;
-  setScrollGesturesEnabledDuringRotateOrZoom(enabled: boolean): Promise<void>;
-  setMapToolbarEnabled(enabled: boolean): Promise<void>;
-  setTrafficEnabled(enabled: boolean): Promise<void>;
-
-  // Markers
-  addMarkers(markers: Object[]): Promise<string[]>;
-  removeMarkers(markerIds: string[]): Promise<void>;
-  clearMarkers(): Promise<void>;
-
-  // Polylines
-  addPolylines(polylines: Object[]): Promise<string[]>;
-  removePolylines(polylineIds: string[]): Promise<void>;
-  clearPolylines(): Promise<void>;
-
-  // Polygons
-  addPolygons(polygons: Object[]): Promise<string[]>;
-  removePolygons(polygonIds: string[]): Promise<void>;
-  clearPolygons(): Promise<void>;
-
-  // Circles
-  addCircles(circles: Object[]): Promise<string[]>;
-  removeCircles(circleIds: string[]): Promise<void>;
-  clearCircles(): Promise<void>;
-
-  // Ground Overlays
-  addGroundOverlays(overlays: Object[]): Promise<string[]>;
-  removeGroundOverlays(overlayIds: string[]): Promise<void>;
-  clearGroundOverlays(): Promise<void>;
-
-  // Padding
-  setPadding(padding: Object): Promise<void>;
-
-  // Follow My Location
-  followMyLocation(perspective: number, zoomLevel?: number): Promise<void>;
-  isFollowMyLocationEnabled(): Promise<boolean>;
-
-  // My Location
-  isMyLocationEnabled(): Promise<boolean>;
-  setMyLocationEnabled(enabled: boolean): Promise<void>;
-  setMyLocationButtonEnabled(enabled: boolean): Promise<void>;
+  // Map objects
+  addMarker(viewId: number, markerOptionsMap: Object): Promise<Object>;
+  addPolyline(viewId: number, polylineOptionsMap: Object): Promise<Object>;
+  addPolygon(viewId: number, polygonOptionsMap: Object): Promise<Object>;
+  addCircle(viewId: number, circleOptionsMap: Object): Promise<Object>;
+  addGroundOverlay(viewId: number, overlayOptionsMap: Object): Promise<Object>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('NavViewModule');

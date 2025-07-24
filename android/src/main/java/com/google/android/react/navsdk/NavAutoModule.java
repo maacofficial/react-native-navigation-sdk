@@ -24,6 +24,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.UiThreadUtil;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.turbomodule.core.interfaces.TurboModule;
@@ -541,11 +542,20 @@ public class NavAutoModule extends ReactContextBaseJavaModule implements INaviga
 
   /** Send command to react native. */
   private void sendCommandToReactNative(String functionName, NativeArray params) {
-    ReactContext reactContext = getReactApplicationContext();
-
-    if (reactContext != null) {
-      CatalystInstance catalystInstance = reactContext.getCatalystInstance();
-      catalystInstance.callFunction(Constants.NAV_AUTO_JAVASCRIPT_FLAG, functionName, params);
+    try {
+      NavAutoEventDispatcher eventDispatcher = NavAutoEventDispatcher.getInstance();
+      if (eventDispatcher != null) {
+        eventDispatcher.sendEvent(functionName, (WritableArray) params);
+      } else {
+        android.util.Log.e(TAG, "NavAutoEventDispatcher is null, cannot send event: " + functionName);
+      }
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to send event to React Native: " + functionName, e);
     }
+  }
+  
+  @Override
+  public boolean canOverrideExistingModule() {
+    return true;
   }
 }

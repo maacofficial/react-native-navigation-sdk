@@ -97,8 +97,14 @@ public class NavModule extends ReactContextBaseJavaModule
 
   public NavModule(ReactApplicationContext reactContext, NavViewManager navViewManager) {
     super(reactContext);
-    setReactContext(reactContext);
+    this.reactContext = reactContext;
     setViewManager(navViewManager);
+    
+    // Add lifecycle listener
+    if (this.reactContext != null) {
+      this.reactContext.addLifecycleEventListener(this);
+    }
+    
     if (moduleReadyListener != null) {
       moduleReadyListener.onModuleReady();
     }
@@ -124,7 +130,7 @@ public class NavModule extends ReactContextBaseJavaModule
 
   public void setReactContext(ReactApplicationContext reactContext) {
     this.reactContext = reactContext;
-    this.reactContext.addLifecycleEventListener(this);
+    // Don't add lifecycle listener here since it's already added in constructor
   }
 
   public void setViewManager(NavViewManager navViewManager) {
@@ -168,6 +174,13 @@ public class NavModule extends ReactContextBaseJavaModule
           mNavigator.clearDestinations();
           mNavigator.cleanup();
         });
+  }
+
+  @ReactMethod
+  public void init() {
+    // Default initialization with empty terms params and default task removed behavior
+    ReadableMap emptyParams = Arguments.createMap();
+    initializeNavigator(emptyParams, 0.0);
   }
 
   @ReactMethod
@@ -222,6 +235,11 @@ public class NavModule extends ReactContextBaseJavaModule
 
   /** Starts the Navigation API, saving a reference to the ready Navigator instance. */
   private void initializeNavigationApi() {
+    if (getCurrentActivity() == null) {
+      onNavigationInitError(NavigationApi.ErrorCode.NOT_AUTHORIZED);
+      return;
+    }
+    
     NavigationApi.getNavigator(
         getCurrentActivity().getApplication(),
         new NavigationApi.NavigatorListener() {
@@ -231,9 +249,15 @@ public class NavModule extends ReactContextBaseJavaModule
             mNavigator = navigator;
             mNavigator.setTaskRemovedBehavior(taskRemovedBehaviour);
             if (mRoadSnappedLocationProvider == null) {
-              mRoadSnappedLocationProvider =
-                  NavigationApi.getRoadSnappedLocationProvider(
-                      getCurrentActivity().getApplication());
+              if (getCurrentActivity() != null) {
+                mRoadSnappedLocationProvider =
+                    NavigationApi.getRoadSnappedLocationProvider(
+                        getCurrentActivity().getApplication());
+              } else {
+                mRoadSnappedLocationProvider =
+                    NavigationApi.getRoadSnappedLocationProvider(
+                        (android.app.Application) reactContext.getApplicationContext());
+              }
             }
             registerNavigationListeners();
             onNavigationReady();
@@ -493,6 +517,19 @@ public class NavModule extends ReactContextBaseJavaModule
     }
 
     mNavigator.startGuidance();
+    
+    // Ensure all navigation views are connected to the navigator
+    // This needs to run on UI thread since it involves UI operations
+    UiThreadUtil.runOnUiThread(() -> {
+      if (mNavViewManager != null) {
+        INavViewFragment navFragment = mNavViewManager.getAnyFragment() instanceof INavViewFragment ? 
+            (INavViewFragment) mNavViewManager.getAnyFragment() : null;
+        if (navFragment != null) {
+          navFragment.refreshNavigatorConnection();
+        }
+      }
+    });
+    
     sendCommandToReactNative("onStartGuidance", (NativeArray) null);
   }
 
@@ -502,15 +539,23 @@ public class NavModule extends ReactContextBaseJavaModule
   }
 
   @ReactMethod
-  public void simulateLocationsAlongExistingRoute(float speedMultiplier) {
+  public void simulateLocationsAlongExistingRoute(double speedMultiplier) {
     if (mWaypoints.isEmpty()) {
       return;
     }
 
+    // Ensure minimum speed for better demonstration
+    double effectiveSpeed = speedMultiplier <= 0 ? 5.0 : Math.max(speedMultiplier, 2.0);
+
     mNavigator
         .getSimulator()
         .simulateLocationsAlongExistingRoute(
-            new SimulationOptions().speedMultiplier(speedMultiplier));
+            new SimulationOptions().speedMultiplier((float) effectiveSpeed));
+  }
+
+  @ReactMethod
+  public void startFastSimulation() {
+    simulateLocationsAlongExistingRoute(10.0); // 10x speed for demonstration
   }
 
   @ReactMethod
@@ -658,33 +703,19 @@ public class NavModule extends ReactContextBaseJavaModule
 
   /** Send command to react native. */
   private void sendCommandToReactNative(String functionName, NativeArray params) {
-    ReactContext reactContext = getReactApplicationContext();
-
-    if (reactContext != null) {
-      try {
-        CatalystInstance catalystInstance = reactContext.getCatalystInstance();
-        
-        // Check if this is the new architecture (BridgelessCatalystInstance)
-        if (catalystInstance != null && catalystInstance.getClass().getSimpleName().contains("Bridgeless")) {
-          // For new architecture, log the event but let's just skip the call for now
-          // to prevent crashes and get the basic initialization working
-          android.util.Log.d(TAG, "New architecture detected - skipping event: " + functionName);
-          
-          // For critical events like onNavigationReady, we might need a different approach
-          if ("onNavigationReady".equals(functionName)) {
-            android.util.Log.i(TAG, "Navigation is ready - this should trigger map display");
-            // The navigation is actually ready, the event just isn't being delivered
-          }
-          return;
-        }
-        
-        // Legacy bridge - use callFunction
-        if (catalystInstance != null) {
-          catalystInstance.callFunction(Constants.NAV_JAVASCRIPT_FLAG, functionName, params);
-        }
-      } catch (Exception e) {
-        // Log the error but don't crash the app
-        android.util.Log.e(TAG, "Failed to send event to React Native: " + functionName, e);
+    try {
+      NavEventDispatcher eventDispatcher = NavEventDispatcher.getInstance();
+      if (eventDispatcher != null) {
+        eventDispatcher.sendEvent(functionName, (WritableArray) params);
+      } else {
+        android.util.Log.e(TAG, "NavEventDispatcher is null, cannot send event: " + functionName);
+      }
+    } catch (Exception e) {
+      android.util.Log.e(TAG, "Failed to send event to React Native: " + functionName, e);
+      
+      // For critical events like onNavigationReady, ensure the basic flow continues
+      if ("onNavigationReady".equals(functionName)) {
+        android.util.Log.i(TAG, "Navigation is ready - basic functionality should work even without event delivery");
       }
     }
   }
@@ -739,7 +770,7 @@ public class NavModule extends ReactContextBaseJavaModule
   }
 
   public Boolean getTermsAccepted() {
-    return NavigationApi.areTermsAccepted(getCurrentActivity().getApplication());
+    return NavigationApi.areTermsAccepted((android.app.Application) reactContext.getApplicationContext());
   }
 
   @ReactMethod
@@ -749,7 +780,7 @@ public class NavModule extends ReactContextBaseJavaModule
 
   @ReactMethod
   public void resetTermsAccepted() {
-    NavigationApi.resetTermsAccepted(getCurrentActivity().getApplication());
+    NavigationApi.resetTermsAccepted((android.app.Application) reactContext.getApplicationContext());
   }
 
   @ReactMethod

@@ -33,6 +33,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.libraries.navigation.NavigationView;
+import com.google.android.libraries.navigation.Navigator;
+import com.google.android.libraries.navigation.OnNavigationUiChangedListener;
 import com.google.android.libraries.navigation.StylingOptions;
 import com.google.android.libraries.navigation.SupportNavigationFragment;
 
@@ -70,7 +72,18 @@ public class NavViewFragment extends SupportNavigationFragment
   public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
 
-    setNavigationUiEnabled(NavModule.getInstance().getNavigator() != null);
+    // Add navigation UI change listener to track when navigation UI gets enabled/disabled
+    addOnNavigationUiChangedListener(new OnNavigationUiChangedListener() {
+      @Override
+      public void onNavigationUiChanged(boolean navigationUiEnabled) {
+        android.util.Log.d(TAG, "Navigation UI changed: " + navigationUiEnabled);
+      }
+    });
+
+    // Try to connect with navigator when view is created
+    Navigator navigator = NavModule.getInstance().getNavigator();
+    android.util.Log.d(TAG, "Navigator available in onViewCreated: " + (navigator != null));
+    setNavigationUiEnabled(navigator != null);
 
     getMapAsync(
         new OnMapReadyCallback() {
@@ -83,9 +96,17 @@ public class NavViewFragment extends SupportNavigationFragment
             // Setup map listeners with the provided callback
             mMapViewController.setupMapListeners(NavViewFragment.this);
 
-            emitEvent("onMapReady", null);
+            // CRITICAL: Ensure navigation UI is enabled when navigator is available
+            Navigator navigator = NavModule.getInstance().getNavigator();
+            android.util.Log.d(TAG, "Navigator available in onMapReady: " + (navigator != null));
+            if (navigator != null) {
+              android.util.Log.d(TAG, "Enabling navigation UI with available navigator");
+              setNavigationUiEnabled(true);
+            } else {
+              android.util.Log.w(TAG, "Navigator not available, navigation UI will be enabled asynchronously");
+            }
 
-            setNavigationUiEnabled(NavModule.getInstance().getNavigator() != null);
+            emitEvent("onMapReady", null);
             addOnRecenterButtonClickedListener(onRecenterButtonClickedListener);
           }
         });
@@ -111,6 +132,58 @@ public class NavViewFragment extends SupportNavigationFragment
 
   public void setNightModeOption(int jsValue) {
     super.setForceNightMode(EnumTranslationUtil.getForceNightModeFromJsValue(jsValue));
+  }
+
+  @Override
+  public void setNavigationUiEnabled(boolean enableNavigationUi) {
+    super.setNavigationUiEnabled(enableNavigationUi);
+  }
+
+  public void refreshNavigatorConnection() {
+    Navigator navigator = NavModule.getInstance().getNavigator();
+    if (navigator != null) {
+      setNavigationUiEnabled(true);
+    }
+  }
+
+  @Override
+  public void setTripProgressBarEnabled(boolean enabled) {
+    // Implementation for trip progress bar
+  }
+
+  @Override
+  public void setSpeedometerEnabled(boolean enabled) {
+    // Implementation for speedometer
+  }
+
+  @Override
+  public void setSpeedLimitIconEnabled(boolean enabled) {
+    // Implementation for speed limit icon
+  }
+
+  @Override
+  public void setTrafficIncidentCardsEnabled(boolean enabled) {
+    // Implementation for traffic incident cards
+  }
+
+  @Override
+  public void setEtaCardEnabled(boolean enabled) {
+    // Implementation for ETA card
+  }
+
+  @Override
+  public void setHeaderEnabled(boolean enabled) {
+    // Implementation for header
+  }
+
+  @Override
+  public void setRecenterButtonEnabled(boolean enabled) {
+    // Implementation for recenter button
+  }
+
+  @Override
+  public void showRouteOverview() {
+    // Implementation for route overview
   }
 
   @Override

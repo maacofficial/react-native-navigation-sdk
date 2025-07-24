@@ -93,24 +93,24 @@ export const useNavigationController = (
         await NavModule.cleanup();
       },
 
-      setDestination: async (
+      setDestination: (
         waypoint: Waypoint,
         routingOptions?: RoutingOptions,
         displayOptions?: DisplayOptions
       ) => {
-        return await NavModule.setDestination(
+        NavModule.setDestination(
           waypoint,
           routingOptions,
           displayOptions
         );
       },
 
-      setDestinations: async (
+      setDestinations: (
         waypoints: Waypoint[],
         routingOptions?: RoutingOptions,
         displayOptions?: DisplayOptions
       ) => {
-        return await NavModule.setDestinations(
+        NavModule.setDestinations(
           waypoints,
           routingOptions,
           displayOptions
@@ -121,16 +121,16 @@ export const useNavigationController = (
         return await NavModule.continueToNextDestination();
       },
 
-      clearDestinations: async () => {
-        return await NavModule.clearDestinations();
+      clearDestinations: () => {
+        NavModule.clearDestinations();
       },
 
-      startGuidance: async () => {
-        return await NavModule.startGuidance();
+      startGuidance: () => {
+        NavModule.startGuidance();
       },
 
-      stopGuidance: async () => {
-        return await NavModule.stopGuidance();
+      stopGuidance: () => {
+        NavModule.stopGuidance();
       },
 
       setSpeedAlertOptions: async (alertOptions: SpeedAlertOptions | null) => {

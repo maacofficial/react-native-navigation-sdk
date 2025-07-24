@@ -46,6 +46,10 @@ public class Package extends TurboReactPackage {
         return new NavAutoModule(reactContext);
       case "NavViewModule":
         return new NavViewModule(reactContext, viewManager);
+      case "NavEventDispatcher":
+        return NavEventDispatcher.getInstance(reactContext);
+      case "NavAutoEventDispatcher":
+        return NavAutoEventDispatcher.getInstance(reactContext);
       default:
         return null;
     }
@@ -58,7 +62,7 @@ public class Package extends TurboReactPackage {
       moduleInfos.put("NavModule", new ReactModuleInfo(
         "NavModule",
         "NavModule",
-        false, // canOverrideExistingModule
+        true,  // canOverrideExistingModule
         false, // needsEagerInit
         true,  // hasConstants
         false, // isCxxModule
@@ -67,7 +71,7 @@ public class Package extends TurboReactPackage {
       moduleInfos.put("NavAutoModule", new ReactModuleInfo(
         "NavAutoModule",
         "NavAutoModule",
-        false, // canOverrideExistingModule
+        true,  // canOverrideExistingModule
         false, // needsEagerInit
         true,  // hasConstants
         false, // isCxxModule
@@ -76,11 +80,29 @@ public class Package extends TurboReactPackage {
       moduleInfos.put("NavViewModule", new ReactModuleInfo(
         "NavViewModule",
         "NavViewModule",
-        false, // canOverrideExistingModule
+        true,  // canOverrideExistingModule
         false, // needsEagerInit
         true,  // hasConstants
         false, // isCxxModule
         true   // isTurboModule
+      ));
+      moduleInfos.put("NavEventDispatcher", new ReactModuleInfo(
+        "NavEventDispatcher",
+        "NavEventDispatcher",
+        true,  // canOverrideExistingModule
+        false, // needsEagerInit
+        true,  // hasConstants
+        false, // isCxxModule
+        false  // isTurboModule
+      ));
+      moduleInfos.put("NavAutoEventDispatcher", new ReactModuleInfo(
+        "NavAutoEventDispatcher",
+        "NavAutoEventDispatcher",
+        true,  // canOverrideExistingModule
+        false, // needsEagerInit
+        true,  // hasConstants
+        false, // isCxxModule
+        false  // isTurboModule
       ));
       return moduleInfos;
     };
@@ -94,6 +116,8 @@ public class Package extends TurboReactPackage {
     modules.add(NavModule.getInstance(reactContext, viewManager));
     modules.add(new NavAutoModule(reactContext));
     modules.add(new NavViewModule(reactContext, viewManager));
+    modules.add(NavEventDispatcher.getInstance(reactContext));
+    modules.add(NavAutoEventDispatcher.getInstance(reactContext));
 
     return modules;
   }

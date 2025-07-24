@@ -1,8 +1,49 @@
 /**
  * Copyright 2024 Google LLC
  *
- * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this fi  public Marker addMarker(Map<String, Object> optionsMap) {
+    if (mGoogleMap == null) {
+      return null;
+    }
+
+    String imagePath = CollectionUtil.getString("imgPath", optionsMap);
+    String title = CollectionUtil.getString("title", optionsMap);
+    String snippet = CollectionUtil.getString("snippet", optionsMap);
+    float alpha = Double.valueOf(CollectionUtil.getDouble("alpha", optionsMap, 1)).floatValue();
+    float rotation =
+        Double.valueOf(CollectionUtil.getDouble("rotation", optionsMap, 0)).floatValue();
+    boolean draggable = CollectionUtil.getBool("draggable", optionsMap, false);
+    boolean flat = CollectionUtil.getBool("flat", optionsMap, false);
+    boolean visible = CollectionUtil.getBool("visible", optionsMap, true);
+
+    MarkerOptions options = new MarkerOptions();
+    if (imagePath != null && !imagePath.isEmpty()) {
+      BitmapDescriptor icon = BitmapDescriptorFactory.fromAsset(imagePath);
+      options.icon(icon);
+    }
+
+    options.position(
+        ObjectTranslationUtil.getLatLngFromMap((Map<String, Object>) optionsMap.get("position")));
+
+    if (title != null) {
+      options.title(title);
+    }
+
+    if (snippet != null) {
+      options.snippet(snippet);
+    }
+
+    options.flat(flat);
+    options.alpha(alpha);
+    options.rotation(rotation);
+    options.draggable(draggable);
+    options.visible(visible);
+
+    Marker marker = mGoogleMap.addMarker(options);
+    markerList.add(marker);
+
+    return marker;
+  }ompliance with the License. You may obtain a copy of the License at
  *
  * <p>http://www.apache.org/licenses/LICENSE-2.0
  *

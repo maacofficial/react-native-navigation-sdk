@@ -307,6 +307,7 @@ export interface NavigationController {
 
   /**
    * Set a single destination on the map using a provided waypoint.
+   * This method is synchronous and will immediately set the destination.
    *
    * @param waypoint - A Waypoint object, defining a destination or stopover point
    *                   with specific attributes, such as place ID, title, and
@@ -316,10 +317,11 @@ export interface NavigationController {
     waypoint: Waypoint,
     routingOptions?: RoutingOptions,
     displayOptions?: DisplayOptions
-  ): Promise<void>;
+  ): void;
 
   /**
    * Set the destinations on the map using the provided waypoints.
+   * This method is synchronous and will immediately set the destinations.
    *
    * @param waypoints - A list of Waypoint objects, each defining a destination
    *                    or stopover point with specific attributes.
@@ -328,7 +330,7 @@ export interface NavigationController {
     waypoints: Waypoint[],
     routingOptions?: RoutingOptions,
     displayOptions?: DisplayOptions
-  ): Promise<void>;
+  ): void;
 
   /**
    * Proceeds to the next destination or waypoint within a predefined route.
@@ -338,20 +340,20 @@ export interface NavigationController {
 
   /**
    * Clears all previously set destinations or waypoints from the map, effectively
-   * removing any predefined routes.
+   * removing any predefined routes. This method is synchronous.
    */
-  clearDestinations(): Promise<void>;
+  clearDestinations(): void;
 
   /**
    * Initiates the guidance mode on the map, typically starting the navigation
    * towards a previously set destination or following a predefined route.
    */
-  startGuidance(): Promise<void>;
+  startGuidance(): void;
 
   /**
    * Stops the ongoing guidance navigation, if active.
    */
-  stopGuidance(): Promise<void>;
+  stopGuidance(): void;
 
   /**
    * Enable or disable reporting of abnormal terminations.

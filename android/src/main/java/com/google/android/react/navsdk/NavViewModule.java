@@ -61,15 +61,15 @@ public class NavViewModule extends ReactContextBaseJavaModule implements TurboMo
   }
 
   @ReactMethod
-  public void getCameraPosition(Integer viewId, final Promise promise) {
+  public void getCameraPosition(double viewId, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
+          if (mNavViewManager.getGoogleMap((int) viewId) == null) {
             promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
             return;
           }
 
-          CameraPosition cp = mNavViewManager.getGoogleMap(viewId).getCameraPosition();
+          CameraPosition cp = mNavViewManager.getGoogleMap((int) viewId).getCameraPosition();
 
           if (cp == null) {
             promise.resolve(null);
@@ -88,16 +88,16 @@ public class NavViewModule extends ReactContextBaseJavaModule implements TurboMo
   }
 
   @ReactMethod
-  public void getMyLocation(Integer viewId, final Promise promise) {
+  public void getMyLocation(double viewId, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
+          if (mNavViewManager.getGoogleMap((int) viewId) == null) {
             promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
             return;
           }
 
           try {
-            Location location = mNavViewManager.getGoogleMap(viewId).getMyLocation();
+            Location location = mNavViewManager.getGoogleMap((int) viewId).getMyLocation();
             if (location == null) {
               promise.resolve(null);
               return;
@@ -112,15 +112,15 @@ public class NavViewModule extends ReactContextBaseJavaModule implements TurboMo
   }
 
   @ReactMethod
-  public void getUiSettings(Integer viewId, final Promise promise) {
+  public void getUiSettings(double viewId, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
+          if (mNavViewManager.getGoogleMap((int) viewId) == null) {
             promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
             return;
           }
 
-          UiSettings settings = mNavViewManager.getGoogleMap(viewId).getUiSettings();
+          UiSettings settings = mNavViewManager.getGoogleMap((int) viewId).getUiSettings();
 
           if (settings == null) {
             promise.resolve(null);
@@ -145,103 +145,155 @@ public class NavViewModule extends ReactContextBaseJavaModule implements TurboMo
   }
 
   @ReactMethod
-  public void isMyLocationEnabled(Integer viewId, final Promise promise) {
+  public void isMyLocationEnabled(double viewId, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
+          if (mNavViewManager.getGoogleMap((int) viewId) == null) {
             promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
             return;
           }
 
-          promise.resolve(mNavViewManager.getGoogleMap(viewId).isMyLocationEnabled());
+          promise.resolve(mNavViewManager.getGoogleMap((int) viewId).isMyLocationEnabled());
         });
   }
 
   @ReactMethod
-  public void addMarker(int viewId, ReadableMap markerOptionsMap, final Promise promise) {
+  public void addMarker(double viewId, ReadableMap markerOptionsMap, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) != null) {
-            Marker marker =
-                mNavViewManager
-                    .getFragmentForViewId(viewId)
-                    .getMapController()
-                    .addMarker(markerOptionsMap.toHashMap());
-
-            promise.resolve(ObjectTranslationUtil.getMapFromMarker(marker));
+          try {
+            if (mNavViewManager.getGoogleMap((int) viewId) == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
+              return;
+            }
+            
+            IMapViewFragment fragment = mNavViewManager.getFragmentForViewId((int) viewId);
+            if (fragment == null || fragment.getMapController() == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, "MapController not available");
+              return;
+            }
+            
+            Marker marker = fragment.getMapController().addMarker(markerOptionsMap.toHashMap());
+            if (marker != null) {
+              promise.resolve(ObjectTranslationUtil.getMapFromMarker(marker));
+            } else {
+              promise.reject("MARKER_CREATION_FAILED", "Failed to create marker");
+            }
+          } catch (Exception e) {
+            promise.reject("MARKER_CREATION_ERROR", "Error creating marker: " + e.getMessage());
           }
         });
   }
 
   @ReactMethod
-  public void addPolyline(int viewId, ReadableMap polylineOptionsMap, final Promise promise) {
+  public void addPolyline(double viewId, ReadableMap polylineOptionsMap, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
-            promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
-            return;
+          try {
+            if (mNavViewManager.getGoogleMap((int) viewId) == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
+              return;
+            }
+            
+            IMapViewFragment fragment = mNavViewManager.getFragmentForViewId((int) viewId);
+            if (fragment == null || fragment.getMapController() == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, "MapController not available");
+              return;
+            }
+            
+            Polyline polyline = fragment.getMapController().addPolyline(polylineOptionsMap.toHashMap());
+            if (polyline != null) {
+              promise.resolve(ObjectTranslationUtil.getMapFromPolyline(polyline));
+            } else {
+              promise.reject("POLYLINE_CREATION_FAILED", "Failed to create polyline");
+            }
+          } catch (Exception e) {
+            promise.reject("POLYLINE_CREATION_ERROR", "Error creating polyline: " + e.getMessage());
           }
-          Polyline polyline =
-              mNavViewManager
-                  .getFragmentForViewId(viewId)
-                  .getMapController()
-                  .addPolyline(polylineOptionsMap.toHashMap());
-
-          promise.resolve(ObjectTranslationUtil.getMapFromPolyline(polyline));
         });
   }
 
   @ReactMethod
-  public void addPolygon(int viewId, ReadableMap polygonOptionsMap, final Promise promise) {
+  public void addPolygon(double viewId, ReadableMap polygonOptionsMap, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
-            promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
-            return;
+          try {
+            if (mNavViewManager.getGoogleMap((int) viewId) == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
+              return;
+            }
+            
+            IMapViewFragment fragment = mNavViewManager.getFragmentForViewId((int) viewId);
+            if (fragment == null || fragment.getMapController() == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, "MapController not available");
+              return;
+            }
+            
+            Polygon polygon = fragment.getMapController().addPolygon(polygonOptionsMap.toHashMap());
+            if (polygon != null) {
+              promise.resolve(ObjectTranslationUtil.getMapFromPolygon(polygon));
+            } else {
+              promise.reject("POLYGON_CREATION_FAILED", "Failed to create polygon");
+            }
+          } catch (Exception e) {
+            promise.reject("POLYGON_CREATION_ERROR", "Error creating polygon: " + e.getMessage());
           }
-          Polygon polygon =
-              mNavViewManager
-                  .getFragmentForViewId(viewId)
-                  .getMapController()
-                  .addPolygon(polygonOptionsMap.toHashMap());
-
-          promise.resolve(ObjectTranslationUtil.getMapFromPolygon(polygon));
         });
   }
 
   @ReactMethod
-  public void addCircle(int viewId, ReadableMap circleOptionsMap, final Promise promise) {
+  public void addCircle(double viewId, ReadableMap circleOptionsMap, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
-            promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
-            return;
+          try {
+            if (mNavViewManager.getGoogleMap((int) viewId) == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
+              return;
+            }
+            
+            IMapViewFragment fragment = mNavViewManager.getFragmentForViewId((int) viewId);
+            if (fragment == null || fragment.getMapController() == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, "MapController not available");
+              return;
+            }
+            
+            Circle circle = fragment.getMapController().addCircle(circleOptionsMap.toHashMap());
+            if (circle != null) {
+              promise.resolve(ObjectTranslationUtil.getMapFromCircle(circle));
+            } else {
+              promise.reject("CIRCLE_CREATION_FAILED", "Failed to create circle");
+            }
+          } catch (Exception e) {
+            promise.reject("CIRCLE_CREATION_ERROR", "Error creating circle: " + e.getMessage());
           }
-          Circle circle =
-              mNavViewManager
-                  .getFragmentForViewId(viewId)
-                  .getMapController()
-                  .addCircle(circleOptionsMap.toHashMap());
-
-          promise.resolve(ObjectTranslationUtil.getMapFromCircle(circle));
         });
   }
 
   @ReactMethod
-  public void addGroundOverlay(int viewId, ReadableMap overlayOptionsMap, final Promise promise) {
+  public void addGroundOverlay(double viewId, ReadableMap overlayOptionsMap, final Promise promise) {
     UiThreadUtil.runOnUiThread(
         () -> {
-          if (mNavViewManager.getGoogleMap(viewId) == null) {
-            promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
-            return;
+          try {
+            if (mNavViewManager.getGoogleMap((int) viewId) == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, JsErrors.NO_MAP_ERROR_MESSAGE);
+              return;
+            }
+            
+            IMapViewFragment fragment = mNavViewManager.getFragmentForViewId((int) viewId);
+            if (fragment == null || fragment.getMapController() == null) {
+              promise.reject(JsErrors.NO_MAP_ERROR_CODE, "MapController not available");
+              return;
+            }
+            
+            GroundOverlay overlay = fragment.getMapController().addGroundOverlay(overlayOptionsMap.toHashMap());
+            if (overlay != null) {
+              promise.resolve(ObjectTranslationUtil.getMapFromGroundOverlay(overlay));
+            } else {
+              promise.reject("OVERLAY_CREATION_FAILED", "Failed to create ground overlay");
+            }
+          } catch (Exception e) {
+            promise.reject("OVERLAY_CREATION_ERROR", "Error creating ground overlay: " + e.getMessage());
           }
-          GroundOverlay overlay =
-              mNavViewManager
-                  .getFragmentForViewId(viewId)
-                  .getMapController()
-                  .addGroundOverlay(overlayOptionsMap.toHashMap());
-
-          promise.resolve(ObjectTranslationUtil.getMapFromGroundOverlay(overlay));
         });
   }
 

@@ -45,10 +45,23 @@ export interface Spec extends TurboModule {
   displayRoute(): Promise<void>;
   clearRoute(): Promise<void>;
   continueToNextDestination(): Promise<boolean>;
+  
+  // Destinations
+  setDestination(
+    waypoint: Object,
+    routingOptions?: Object | null,
+    displayOptions?: Object | null
+  ): void;
+  setDestinations(
+    waypoints: Object[],
+    routingOptions?: Object | null,
+    displayOptions?: Object | null
+  ): void;
+  clearDestinations(): void;
 
   // Navigation
-  startGuidance(): Promise<void>;
-  stopGuidance(): Promise<void>;
+  startGuidance(): void;
+  stopGuidance(): void;
   isGuidanceRunning(): Promise<boolean>;
   startNavigation(): Promise<void>;
   stopNavigation(): Promise<void>;
@@ -72,18 +85,33 @@ export interface Spec extends TurboModule {
   setLocationSimulationOptions(options: Object): Promise<void>;
   getLocationSimulationOptions(): Promise<Object>;
   removeLocationSimulationOptions(): Promise<void>;
+  simulateLocation(location: Object): void;
+  simulateLocationsAlongExistingRoute(speedMultiplier: number): void;
+  startFastSimulation(): void;
+  stopLocationSimulation(): void;
+  pauseLocationSimulation(): void;
+  resumeLocationSimulation(): void;
 
   // Voice
   setAudioGuidance(guidance: Object): Promise<void>;
+  setAudioGuidanceType(index: number): void;
   getAudioGuidance(): Promise<Object>;
 
   // Navigation Info
   getCurrentTimeAndDistance(): Promise<Object | null>;
+  getCurrentRouteSegment(): Promise<Object | null>;
   getRouteSegments(): Promise<Object[]>;
+  getTraveledPath(): Promise<Object[]>;
+
+  // Location Updates
+  startUpdatingLocation(): void;
+  stopUpdatingLocation(): void;
 
   // Misc
   setTaskRemovedBehavior(behavior: number): Promise<void>;
+  setTurnByTurnLoggingEnabled(isEnabled: boolean): void;
   enableUpdateInfo(enable: boolean): Promise<void>;
+  getNavSDKVersion(): Promise<string>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('NavModule');
