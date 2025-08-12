@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.3](https://github.com/googlemaps/react-native-navigation-sdk/compare/v0.9.2...v0.9.3) (2025-01-24)
+
+
+### Bug Fixes
+
+* fix setAudioGuidanceType parameter type to handle React Native bridge double values ([#TBD](https://github.com/googlemaps/react-native-navigation-sdk/issues/TBD))
+* improve showRouteOverview implementation with proper UI thread handling and error catching ([#TBD](https://github.com/googlemaps/react-native-navigation-sdk/issues/TBD))
+
 ## [0.9.2](https://github.com/googlemaps/react-native-navigation-sdk/compare/v0.9.1...v0.9.2) (2024-12-17)
 
 

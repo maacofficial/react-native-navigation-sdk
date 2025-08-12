@@ -11944,7 +11944,7 @@ __metadata:
     react-native-builder-bob: ^0.38.0
     react-native-gesture-handler: ^2.24.0
     react-native-permissions: ^5.2.6
-    react-native-safe-area-context: ^5.5.2
+    react-native-safe-area-context: ^5.3.0
     react-native-screens: ^3.35.0
     react-native-select-dropdown: ^4.0.1
     react-native-snackbar: ^2.8.0
@@ -11966,13 +11966,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:^5.5.2":
-  version: 5.5.2
-  resolution: "react-native-safe-area-context@npm:5.5.2"
+"react-native-safe-area-context@npm:^5.3.0":
+  version: 5.6.0
+  resolution: "react-native-safe-area-context@npm:5.6.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 694e293b474b0738899c6e09da9f001d8087b382b5a40b8b227765c861a8137f0ff0209f1c9d8ae94337bc9c170eb114a9b897a8661b8181f48759a21baeb265
+  checksum: 23f382a6504dc6ff1064fe45af53207014a27d3312eeaa5e0fd92281c425cb518d7e5e7bc79cf29b0f8e685a30931df93800dfe98e5d81bd768499aa5e737ab0
   languageName: node
   linkType: hard
 

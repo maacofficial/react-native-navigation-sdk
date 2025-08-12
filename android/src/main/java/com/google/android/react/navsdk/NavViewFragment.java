@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.UIManagerHelper;
 import com.facebook.react.uimanager.events.Event;
@@ -183,7 +184,15 @@ public class NavViewFragment extends SupportNavigationFragment
 
   @Override
   public void showRouteOverview() {
-    // Implementation for route overview
+    // Ensure we run on UI thread and call the parent's showRouteOverview method
+    UiThreadUtil.runOnUiThread(() -> {
+      try {
+        super.showRouteOverview();
+        android.util.Log.d(TAG, "Route overview displayed");
+      } catch (Exception e) {
+        android.util.Log.e(TAG, "Error showing route overview", e);
+      }
+    });
   }
 
   @Override

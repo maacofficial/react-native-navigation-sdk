@@ -609,14 +609,14 @@ public class NavModule extends ReactContextBaseJavaModule
   }
 
   @ReactMethod
-  public void setAudioGuidanceType(int jsValue) {
+  public void setAudioGuidanceType(double jsValue) {
     if (mNavigator == null) {
       return;
     }
 
     UiThreadUtil.runOnUiThread(
         () -> {
-          mNavigator.setAudioGuidance(EnumTranslationUtil.getAudioGuidanceFromJsValue(jsValue));
+          mNavigator.setAudioGuidance(EnumTranslationUtil.getAudioGuidanceFromJsValue((int) jsValue));
         });
   }
 

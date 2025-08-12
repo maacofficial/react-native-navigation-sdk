@@ -1,6 +1,6 @@
 {
   "name": "@mdemircioglu/react-native-navigation-sdk",
-  "version": "0.9.2-34",
+  "version": "0.9.3-59",
   "author": "Wattod (forked from Google)",
   "description": "A React Native library for Navigation SDK on Google Maps Platform (supports Fabric + TurboModules)",
   "main": "lib/commonjs/index",
